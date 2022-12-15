@@ -1,5 +1,8 @@
 # 订阅信息查询 Telegram Bot
 
+## DEMO
+
+[@houhuayuan_bot](https://t.me/houhuayuan_bot)
 
 ## 安装教程
 
