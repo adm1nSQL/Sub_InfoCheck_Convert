@@ -4,24 +4,23 @@ import time
 import requests
 import telebot
 from datetime import datetime
-
-# API_KEY = os.environ['token']
-# API_KEY = os.getenv('API_KEY')
+from urllib import parse
 
 API_KEY = "<YOUR BOT TOKEN>"
 bot = telebot.TeleBot(API_KEY)
 
+
 def botinit():
-    bot.delete_my_commands(scope=None, language_code=None) #
+    bot.delete_my_commands(scope=None, language_code=None)  #
 
     bot.set_my_commands(
         commands=[
             telebot.types.BotCommand("subinfo", "查询机场订阅信息"),
             telebot.types.BotCommand("sub", "回复消息查询⬆"),
+            telebot.types.BotCommand("dyzh", "转换订阅为clash格式"),
+            telebot.types.BotCommand("zh", "回复消息转换订阅"),
             telebot.types.BotCommand("help", "帮助菜单")
         ],
-        # scope=telebot.types.BotCommandScopeChat(12345678)  # use for personal command for users
-        # scope=telebot.types.BotCommandScopeAllPrivateChats()  # use for all private chats
     )
     print('Bot初始化完成')
 
@@ -60,7 +59,7 @@ def StrOfSize(size):
     integer, remainder, level = strofsize(size, 0, 0)
     if level + 1 > len(units):
         level = -1
-    return ('{}.{:>03d} {}'.format(integer, remainder, units[level]))
+    return '{}.{:>03d} {}'.format(integer, remainder, units[level])
 
 
 def subinfo(url):
@@ -74,7 +73,7 @@ def subinfo(url):
             try:
                 res = requests.get(url, headers=headers, timeout=5)  # 设置5秒超时防止卡死
             except:
-                final_output = final_output +'订阅链接：`' + url + '`\n连接错误' + '\n\n'
+                final_output = final_output + '订阅链接：`' + url + '`\n连接错误' + '\n\n'
                 continue
             if res.status_code == 200:
                 try:
@@ -101,19 +100,48 @@ def subinfo(url):
             else:
                 output_text = '订阅链接：`' + url + '`\n无法访问\n'
             final_output = final_output + output_text + '\n\n'
-        return (final_output)
+        return final_output
     except:
-        return ('参数错误')
+        return '参数错误'
 
-@bot.message_handler(commands=['start'],func=lambda message:message.chat.type == "private")
+
+def subzh(url):
+    try:
+        message_raw = url
+        print(url)
+        final_output = ''
+        print(1)
+        url_list = re.findall("https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
+                              message_raw)  # 使用正则表达式查找订阅链接并创建列表
+        print(2)
+        for url in url_list:
+            if len(url) != 0:
+                try:
+                    ss = parse.quote_plus(url)
+                    result = "https://api.gdmm.ml/sub?target=clash&url=" + ss + "&insert=false&config=https%3A%2F%2Fraw.githubusercontent.com%2FACL4SSR%2FACL4SSR%2Fmaster%2FClash%2Fconfig%2FACL4SSR_Online.ini&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true"
+                    return result
+                except:
+                    raise RuntimeError('网络错误，请重新尝试')
+            else:
+                output_text = '转换失败'
+            final_output = output_text + '\n\n'
+        return final_output
+    except:
+        return '参数错误'
+
+
+@bot.message_handler(commands=['start'], func=lambda message: message.chat.type == "private")
 def start(message):
-    bot.send_message(message.chat.id,  f"您好`{message.from_user.first_name}`，您可以使用我来查询机场订阅信息",parse_mode='Markdown')
+    bot.send_message(message.chat.id, f"您好`{message.from_user.first_name}`，您可以使用我来查询机场订阅信息，也可以使用我来转换订阅为clash格式",
+                     parse_mode='Markdown')
 
 
 @bot.message_handler(commands=["help"])
 def help(message):
-    back_msg = bot.send_message(message.chat.id, f" /subinfo <订阅链接>\n"
-                                                 f" /sub[空格] 回复一条消息\n"
+    back_msg = bot.send_message(message.chat.id, f" /subinfo <订阅链接>，查询流量\n"
+                                                 f" /sub[空格] 回复一条消息，查询流量\n"
+                                                 f" /dyzh[空格] 订阅链接，订阅转换\n"
+                                                 f" /zh[空格] 回复一条消息将其转换为clash格式\n"
                                                  f" /ping 检查机器人是否工作")
     time.sleep(15)
     try:
@@ -121,36 +149,59 @@ def help(message):
     except:
         return
 
+
 @bot.message_handler(commands=['subinfo'])
 def get_subinfo(message):
     info_text = subinfo(message.text)
     try:
-        bot.reply_to(message, info_text,parse_mode='Markdown')
+        bot.reply_to(message, info_text, parse_mode='Markdown')
     except:
         return
+
 
 @bot.message_handler(commands=['sub'])
 def get_sub(message):
-    if message.reply_to_message == None:
+    if message.reply_to_message is None:
         return
-    back_msg = bot.send_message(message.chat.id, f" `正在查询...`", disable_notification=True,parse_mode='Markdown')
+    back_msg = bot.send_message(message.chat.id, f" `正在查询...`", disable_notification=True, parse_mode='Markdown')
     info_text = subinfo(message.reply_to_message.text)
     try:
-        bot.reply_to(message, info_text,parse_mode='Markdown')
+        bot.reply_to(message, info_text, parse_mode='Markdown')
         bot.delete_message(message.chat.id, back_msg.id, timeout=3)
     except:
         bot.delete_message(message.chat.id, back_msg.id, timeout=3)
         return
 
+
+@bot.message_handler(commands=['dyzh'])
+def get_subzh(message):
+    atext = subzh(message.text)
+    bot.reply_to(message, atext)
+
+
+@bot.message_handler(commands=['zh'])
+def get_zh(message):
+    if message.reply_to_message is None:
+        return
+    back_msg = bot.send_message(message.chat.id, f" `正在转换...`", disable_notification=True, parse_mode='Markdown')
+    info_text = subzh(message.reply_to_message.text)
+    try:
+        bot.reply_to(message, info_text, parse_mode='Markdown')
+        bot.delete_message(message.chat.id, back_msg.id, timeout=3)
+    except:
+        bot.delete_message(message.chat.id, back_msg.id, timeout=3)
+        return
+
+
 @bot.message_handler(commands=['ping'])
 def get_dalay(message):
-  start = datetime.now()
-  # s1 = time.time()
-  # msg_delay2 = s1-message.date
-  message =  bot.reply_to(message,"pong~",disable_notification=True)
-  end = datetime.now()
-  msg_delay = (end-start).microseconds/1000
-  bot.edit_message_text(f"pong~ | 消息延迟: `{msg_delay:.2f}ms`",message.chat.id,message.id,parse_mode='Markdown')
+    start = datetime.now()
+    # s1 = time.time()
+    # msg_delay2 = s1-message.date
+    message = bot.reply_to(message, "pong~", disable_notification=True)
+    end = datetime.now()
+    msg_delay = (end - start).microseconds / 1000
+    bot.edit_message_text(f"pong~ | 消息延迟: `{msg_delay:.2f}ms`", message.chat.id, message.id, parse_mode='Markdown')
 
 
 if __name__ == '__main__':
