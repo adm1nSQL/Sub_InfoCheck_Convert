@@ -1,4 +1,4 @@
-# 订阅信息查询 Telegram Bot
+# 订阅信息查询&订阅转换 Telegram Bot
 
 ## DEMO
 
