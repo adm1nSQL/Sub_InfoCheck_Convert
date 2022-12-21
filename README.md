@@ -49,6 +49,8 @@ python3 subinfo2.py
 
 > `/subinfo URL`
 
+> `/sub 回复一条URL消息`
+
 > `/dyzh URL`
 
 > `/zh 回复一条URL消息`
