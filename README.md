@@ -49,6 +49,10 @@ python3 subinfo2.py
 
 > `/subinfo URL`
 
+> `/dyzh URL`
+
+> `/zh 回复一条URL消息`
+
 ## 感谢
 
 subinfo的主要代码来源自`telegram-PGM`模块<br>
