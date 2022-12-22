@@ -58,4 +58,4 @@ python3 subinfo2.py
 ## 感谢
 
 subinfo的主要代码来源自`telegram-PGM`模块<br>
-Subinfo_Checker project via. [RenaLio](https://github.com/RenaLio/SubinfoChecker)
+Subinfo_Checker program via. [RenaLio](https://github.com/RenaLio/SubinfoChecker)
