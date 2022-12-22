@@ -9,7 +9,7 @@
 先去botfather获取bot token，然后在vps内使用一下命令安装bot
 
 ```
-git clone https://github.com/adm1nSQL/SubinfoChecker
+git clone https://github.com/adm1nSQL/Sub_InfoCheck_Convert
 ```
 
 
