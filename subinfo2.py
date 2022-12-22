@@ -18,7 +18,7 @@ def botinit():
             telebot.types.BotCommand("subinfo", "查询机场订阅信息"),
             telebot.types.BotCommand("sub", "回复消息查询⬆"),
             telebot.types.BotCommand("dyzh", "转换订阅为clash格式"),
-            telebot.types.BotCommand("zh", "回复消息转换订阅"),
+            telebot.types.BotCommand("zh", "回复消息转换⬆"),
             telebot.types.BotCommand("help", "帮助菜单")
         ],
     )
